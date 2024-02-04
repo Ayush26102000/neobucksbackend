@@ -1,8 +1,12 @@
 const express = require('express'); 
 const mysql = require('mysql');
 const cors = require('cors');
+const bodyParser = require('body-parser');
+
 
 const app = express(); 
+app.use(bodyParser.json());
+
 const PORT = 3000; 
 app.use(cors());
 cors({ credentials: true, origin: true })
@@ -26,15 +30,24 @@ db.connect(err => {
  
 app.listen(PORT, (error) =>{ 
     if(!error) 
-        console.log("Server is Successfully Running, and App is listening on port "+ PORT) 
+    console.log(`Server is running at http://localhost:${PORT}`);
     else 
         console.log("Error occurred, server can't start", error); 
     } 
 ); 
 
 
-app.post('/CreateUser', (req, res) => {
-    console.log(req.body);
-    
-    res.json({requestBody: req.body});
+app.post('/SaveName', (req, res) => {
+    const requestBody = req.body;
+    const name = requestBody.body;
+
+    const sql = 'INSERT INTO Users (name) VALUES (?)';
+
+    db.query(sql, [name], (err, result) => {
+        if (err) {
+            res.status(500).json({ status: 'Error inserting into the database' });
+        } else {
+            res.json({ status: 1 });
+        }
+    });
 });
